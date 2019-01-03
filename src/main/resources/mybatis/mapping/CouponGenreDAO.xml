@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wx.dao.CouponGenreDAO">
+	<resultMap type="com.wx.entity.CouponGenre" id="couponGenreMap">
+		<id column="TYPE_ID"                  property="typeId"         jdbcType="INTEGER"/>
+		<result column="COUPON_NAME"          property="couponName"     jdbcType="VARCHAR"/>
+		<result column="COUPON_AMT"           property="couponAmt"      jdbcType="INTEGER"/>
+		<result column="PER_NUM"              property="preNum"         jdbcType="INTEGER"/>
+		<result column="USE_LIMIT"            property="useLimit"       jdbcType="INTEGER"/>
+		<result column="COUPON_PRE"           property="couponPre"      jdbcType="VARCHAR"/>
+		<result column="COUPON_LEN"           property="couponLen"      jdbcType="INTEGER"/>
+		<result column="TOTAL_NUM"            property="totalNum"       jdbcType="INTEGER"/>
+		<result column="SHOP_OWNER"           property="shopOwner"      jdbcType="VARCHAR"/>
+		<result column="CREATE_DATE"          property="createDate"     jdbcType="DATE"/>
+		<result column="END_DATE"             property="endDate"        jdbcType="DATE"/>
+		<result column="CREATOR"              property="creator"        jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="genreCols">
+		TYPE_ID,COUPON_NAME,COUPON_AMT,PER_NUM,USE_LIMIT,COUPON_PRE,COUPON_LEN,TOTAL_NUM,SHOP_OWNER,CREATE_DATE,END_DATE,CREATOR
+	</sql>
+	
+	<insert id="addCouponGenre" parameterType="com.wx.entity.CouponGenre" >
+		INSERT INTO
+			COUPON_GENRE_TAB
+		(TYPE_ID,
+		 COUPON_NAME,
+		 COUPON_AMT,
+		 PER_NUM,
+		 USE_LIMIT,
+		 COUPON_PRE,
+		 COUPON_LEN,
+		 TOTAL_NUM,
+		 SHOP_OWNER,
+		 CREATE_DATE,
+		 END_DATE,
+		 UPDATE_DATE,
+		 IS_EXPIRE,
+		 CREATOR
+		)VALUES
+		(#{typeId},
+		 #{couponName},
+		 #{couponAmt},
+		 #{preNum}
+		 #{useLimit},
+		 #{couponPre},
+		 #{couponLen},
+		 #{totalNum},
+		 #{shopOwner},
+		 now(),
+		 now(),
+		 #{endDate},
+		 '0',
+		 #{creator}
+		)
+	</insert>
+	
+	<select id="qryAll" parameterType="com.wx.entity.CouponGenre" resultMap="couponGenreMap">
+		SELECT
+			 <include refid="genreCols" />
+		FROM
+			COUPON_GENRE_TAB
+		<where>
+			<if test="isExpire != null and isExpire != ''">
+				 IS_EXPIRE=#{isExpire}
+			</if>
+			<if test="typeId > 0">
+				AND TYPE_ID=#{typeId}
+			</if>
+			<if test="couponPre != null and couponPre != ''">
+				AND COUPON_PRE=#{couponPre}
+			</if>
+			<if test="shopOwner != null and shopOwner != ''">
+				AND SHOP_OWNER = #{shopOwner}
+			</if>
+		</where>
+	</select>
+	
+	<select id="qryById">
+		SELECT
+			 <include refid="genreCols" />
+		FROM
+			COUPON_GENRE_TAB
+		WHERE
+			TYPE_ID=#{typeId}
+	</select>
+	
+	<update id="updateCouponGenre" parameterType="com.wx.entity.CouponGenre" >
+		UPDATE
+			COUPON_GENRE_TAB
+		SET
+			<if test="couponName != null and couponName != ''">
+				COUPON_NAME = #{couponName},
+			</if>
+			<if test="COUPON_AMT != 0">
+				COUPON_AMT = #{couponAmt},
+			</if>
+			<if test="useLimit != 0">
+				USE_LIMIT = #{useLimit},
+			</if>
+			<if test="shopOwner != null and shopOwner != ''">
+				SHOP_OWNER = #{shopOwner},
+			</if>
+			<if test="isExpire != null and isExpire != ''">
+				IS_EXPIRE=#{isExpire},
+			</if>
+			UPDATE_DATE=now()
+		WHERE
+			TYPE_ID=#{typeId}
+	</update>
+	
+	<delete id="delCouponGenre">
+		DELETE FROM
+			COUPON_GENRE_TAB
+		WHERE
+			IS_EXPIRE='2'
+	</delete>
+	
+</mapper>

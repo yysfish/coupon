@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wx.dao.CouponDAO">
+	<resultMap id="couponMap" type="com.wx.entity.Coupon">
+		<id column="COUPON_ID"                 property="couponId"      jdbcType="INTEGER"/>
+		<result column="TYPE_ID"               property="typeId"        jdbcType="INTEGER"/>
+		<result column="SHOP_OWNER"            property="shopOwner"    jdbcType="VARCHAR"/>
+		<result column="COUPON_CODE"           property="couponCode"    jdbcType="VARCHAR"/>
+		<result column="COUPON_STATUS"         property="couponStatus"  jdbcType="VARCHAR"/>
+		<result column="OWNER_PHONE"           property="ownerPhone"    jdbcType="VARCHAR"/>
+		<result column="CREATE_DATE"           property="createDate"    jdbcType="DATE"/>
+		<result column="GRAP_DATE"             property="grapDate"      jdbcType="DATE"/>
+		<result column="USE_DATE"              property="useDate"       jdbcType="DATE"/>
+		<result column="EXPIRE_DATE"           property="expireDate"    jdbcType="DATE"/>
+	</resultMap>
+	
+	<sql id="codeCols">
+		COUPON_ID,TYPE_ID,SHOP_OWNER,COUPON_CODE,COUPON_STATUS,OWNER_PHONE,CREATE_DATE,GRAP_DATE,USE_DATE,EXPIRE_DATE
+	</sql>
+	
+	<insert id="batchAdd" parameterType="list">
+		INSERT INTO COUPON_CODE_TAB 
+		(TYPE_ID,
+		 COUPON_CODE,
+		 COUPON_STATUS,
+		 OWNER_PHONE,
+		 CREATE_DATE,
+		 GRAP_DATE,
+		 USE_DATE,
+		 EXPIRE_DATE
+		)
+		VALUES
+		<foreach collection="list" item="item" separator="," >
+			(#{typeId},
+			 #{couponCode},
+			 #{couponStatus},
+			 #{ownerPhone},
+			 now(),
+			 #{grapDate},
+			 #{useDate},
+			 #{expireDate}
+			)
+		</foreach>
+	</insert>
+	
+	<update id="updateCoupon" parameterType="com.wx.entity.Coupon">
+		UPDATE
+			COUPON_CODE_TAB
+		SET
+			<if test="ownerPhone != null and ownerPhone != ''">
+				OWNER_PHONE=#{ownerPhone},
+			</if>
+			<if test="targetStatus != null and targetStatus != ''">
+				COUPON_STATUS=#{targetStatus},
+			</if>
+			<choose>
+				<when test="targetStatus == '1'">
+					GRAP_DATE=now()
+				</when>
+				<when test="targetStatus == '2'">
+					USE_DATE=now()
+				</when>
+				<otherwise>
+					EXPIRE_DATE=now()
+				</otherwise>
+			</choose>
+		<where>
+			<if test="couponId != 0">
+				AND COUPON_ID=#{couponId}
+			</if>
+			<if test="couponStatus !=null and couponStatus != ''">
+				AND COUPON_STATUS =#{couponStatus}
+			</if>
+			<if test="typeId > 0">
+				TYPE_ID=#{typeId}
+			</if>
+			<if test="shopOwner != null and shopOwner != ''">
+				AND SHOP_OWNER=#{shopOwner}
+			</if>
+		</where>
+	</update>
+	
+	<select id="qry" parameterType="com.wx.entity.Coupon" resultMap="couponMap">
+		SELECT
+			<include refid="codeCols" />
+		FROM
+			COUPON_CODE_TAB
+		<where>
+			<if test="ownerPhone != null and ownerPhone != ''">
+				OWNER_PHONE=#{ownerPhone}
+			</if>
+			<if test="typeId > 0">
+				AND TYPE_ID=#{typeId}
+			</if>
+			<if test="targetStatus != null and targetStatus != ''">
+				AND COUPON_STATUS=#{targetStatus}
+			</if>
+			<if test="shopOwner != null and shopOwner != ''">
+				AND SHOP_OWNER=#{shopOwner}
+			</if>
+		</where>
+		<if test="limit != null and limit != ''">
+			LIMIT #{limit}
+		</if>
+	</select>
+	
+	<select id="qryAll" parameterType="Integer" resultMap="couponMap">
+		SELECT
+			<include refid="codeCols" />
+		 FROM
+		 	COUPON_CODE_TAB
+		 WHERE
+		 	COUPON_STATUS='0'
+		 AND
+		 	TYPE_ID=#{typeId}
+		 LIMIT 500
+	</select>
+	
+	<select id="qryCousById" parameterType="Integer" resultType="java.util.ArrayList">
+		SELECT
+			COUPON_CODE
+		FROM
+			COUPON_CODE_TAB
+		WHERE
+			TYPE_ID=#{typeId}
+		AND
+			COUPON_STATUS='0'
+	</select>
+	
+	<delete id="del" parameterType="Integer" >
+		DELETE FROM
+			COUPON_CODE_TAB
+		WHERE
+			COUPON_STATUS='3'
+		AND
+			TYPE_ID=#{typeId}
+	</delete>
+</mapper>

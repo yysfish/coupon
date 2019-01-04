@@ -76,7 +76,7 @@
 		</where>
 	</select>
 	
-	<select id="qryById">
+	<select id="qryById" parameterType="Integer" resultMap="couponGenreMap">
 		SELECT
 			 <include refid="genreCols" />
 		FROM

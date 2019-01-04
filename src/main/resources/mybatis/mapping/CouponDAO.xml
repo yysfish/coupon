@@ -116,7 +116,7 @@
 		 LIMIT 500
 	</select>
 	
-	<select id="qryCousById" parameterType="Integer" resultType="java.util.ArrayList">
+	<select id="qryCousById" parameterType="Integer" resultType="String">
 		SELECT
 			COUPON_CODE
 		FROM
